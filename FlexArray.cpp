@@ -57,28 +57,28 @@ string FlexArray::print() const {
     if (size == 0) {
         return "[]";
     }
-
     string result = "[";
     for (int i = 0; i < size - 1; ++i) {
-        result += std::to_string(arr_[i]) + ", ";
+        result += std::to_string(arr_[(capacity - size) / 2 + i]) + ", ";
     }
-    result += std::to_string(arr_[size - 1]) + "]";
-
+    result += std::to_string(arr_[(capacity - size) / 2 + size - 1]) + "]";
     return result;
 }
 
 string FlexArray::printAll() const {
     string result = "[";
-    for (int i = 0; i < size; ++i) {
-        if (i < (capacity - size) / 2 || i >= (capacity + size) / 2) {
-            result += "X";
+    for (int i = 0; i < capacity; ++i) {
+        if (i >= (capacity - size) / 2 && i < (capacity + size) / 2) {
+            result += std::to_string(arr_[i]);
         } else {
-            result += std::to_string(arr_[i - (capacity - size) / 2]);
+            result += "X"; // Represent unoccupied positions with 'X'
         }
-        if (i < size - 1) {
+
+        if (i < capacity - 1) {
             result += ", ";
         }
     }
+
     result += "]";
     return result;
 }
