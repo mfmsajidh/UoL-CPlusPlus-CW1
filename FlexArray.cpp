@@ -118,7 +118,7 @@ void FlexArray::push_back(int v) {
     if (size == 0) {
         arr_[(capacity - 1) / 2] = v;
         size = 1;
-    } else if (size < capacity - ((capacity - size) / 2)) {
+    } else if (size < capacity - (capacity - size) / 2) {
         arr_[(capacity - size) / 2 + size] = v;
         ++size;
     } else {
@@ -130,9 +130,7 @@ void FlexArray::push_back(int v) {
 
 bool FlexArray::pop_back() {
     if (size == 0) return false;
-
     --size;
-
     if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
         resizeAndRecenter(LO_THRESHOLD * size);
     }
@@ -144,7 +142,10 @@ void FlexArray::push_front(int v) {
         arr_[(capacity - 1) / 2] = v;
         size = 1;
     } else if ((capacity - size) / 2 > 0) {
-        arr_[(capacity - size) / 2 - 1] = v;
+        for (int i = size; i > 0; --i) {
+            arr_[(capacity - size) / 2 + i] = arr_[(capacity - size) / 2 + i - 1];
+        }
+        arr_[(capacity - size) / 2] = v;
         ++size;
     } else {
         resizeAndRecenter(LO_THRESHOLD * (size + 1));
@@ -155,9 +156,7 @@ void FlexArray::push_front(int v) {
 
 bool FlexArray::pop_front() {
     if (size == 0) return false;
-
     --size;
-
     if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
         resizeAndRecenter(LO_THRESHOLD * size);
     }
@@ -165,52 +164,27 @@ bool FlexArray::pop_front() {
 }
 
 bool FlexArray::insert(int i, int v) {
-    if (i < 0 || i > size) {
-        return false;
-    }
-
-    // Resize if necessary
-    if (size == capacity) {
-        resizeAndRecenter(LO_THRESHOLD * (size + 1));
-    }
+    if (i < 0 || i > size) return false;
+    if (size == capacity) resizeAndRecenter(LO_THRESHOLD * (size + 1));
 
     int start = (capacity - size) / 2;
-    int end = start + size;
-
-    // Decide direction to shift
-    bool shiftRight = (i - start) <= (end - i);
-
-    if (shiftRight) {
-        for (int j = size; j > i; --j) {
-            arr_[start + j] = arr_[start + j - 1];
-        }
-    } else {
-        for (int j = 0; j < i; ++j) {
-            arr_[start + j - 1] = arr_[start + j];
-        }
-        start--;
+    for (int j = size; j > i; --j) {
+        arr_[start + j] = arr_[start + j - 1];
     }
-
     arr_[start + i] = v;
     ++size;
     return true;
 }
 
 bool FlexArray::erase(int i) {
-    if (i < 0 || i >= size) {
-        return false;
-    }
+    if (i < 0 || i >= size) return false;
 
     int start = (capacity - size) / 2;
-
-    // Shifting elements to close the gap
     for (int j = i; j < size - 1; ++j) {
         arr_[start + j] = arr_[start + j + 1];
     }
-
     --size;
 
-    // Resize if the array is now too large
     if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
         resizeAndRecenter(LO_THRESHOLD * size);
     }
