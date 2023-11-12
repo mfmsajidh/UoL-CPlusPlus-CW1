@@ -4,22 +4,10 @@ using std::string;
 class FlexArray {
 
 public:
-	// GENERAL CLASS CONSTRUCTION/ASSIGNMENT
-
-	// Default constructor. Initialize size to 0 and capacity to
-	// INITIALCAP.
 	FlexArray();
 
-	// Parameterised constructor. Set capacity of internal array to
-	// LO_THRESHOLD*size, and initialize contents of FlexArray to be
-	// same as the input array arr.	Contents should be centered.
-	// For example, if arr = [1,2], then using the notation in the
-	// assignment webpage, the internal array should be
-	// [X, X, 1, 2, X, X].
-	// size is the size of arr.
 	FlexArray(const int* arr, int size);
 
-	// Destructor
 	~FlexArray();
 
 	// Copy constructor
@@ -97,8 +85,7 @@ public:
 	static constexpr int HI_THRESHOLD = 7;
 
 private:
-	// TODO: add your private member data (and possibly functions)
-
-	int* arr_; // pointer to internal array
-
+	int* arr_;
+    int size;
+    int capacity;
 };
