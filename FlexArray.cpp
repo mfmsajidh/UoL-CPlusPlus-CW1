@@ -78,7 +78,6 @@ string FlexArray::printAll() const {
             result += ", ";
         }
     }
-
     result += "]";
     return result;
 }
@@ -102,101 +101,65 @@ bool FlexArray::set(int i, int v) {
     }
 }
 
-void FlexArray::push_back(int v) {
-    if (size >= capacity) {
-        int newCapacity = LO_THRESHOLD * size;
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
+void FlexArray::resizeAndRecenter(int newCapacity) {
+    int* newArr = new int[newCapacity];
+    int start = (newCapacity - size) / 2;
 
-        int start = (newInternalSize - size) / 2;
-        for (int i = 0; i < size; ++i) {
-            newArr[start + i] = arr_[i];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+    for (int i = 0; i < size; ++i) {
+        newArr[start + i] = arr_[(capacity - size) / 2 + i];
     }
 
-    int internalIndex = (capacity - size) / 2 + size;
-    arr_[internalIndex] = v;
-    ++size;
+    delete[] arr_;
+    arr_ = newArr;
+    capacity = newCapacity;
+}
+
+void FlexArray::push_back(int v) {
+    if (size == 0) {
+        arr_[(capacity - 1) / 2] = v;
+        size = 1;
+    } else if (size < capacity - ((capacity - size) / 2)) {
+        arr_[(capacity - size) / 2 + size] = v;
+        ++size;
+    } else {
+        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+        arr_[(capacity - size) / 2 + size] = v;
+        ++size;
+    }
 }
 
 bool FlexArray::pop_back() {
-    if (size == 0) {
-        return false;
-    }
+    if (size == 0) return false;
 
     --size;
 
-    if (size <= capacity / 2 && capacity > INITIALCAP) {
-        int newCapacity = LO_THRESHOLD * size;
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
-
-        int start = (newInternalSize - size) / 2;
-        for (int i = 0; i < size; ++i) {
-            newArr[start + i] = arr_[i];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+    if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size);
     }
     return true;
 }
 
 void FlexArray::push_front(int v) {
-    if (size + 1 > capacity) {
-        int newCapacity = LO_THRESHOLD * (size + 1);
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
-
-        int start = (newInternalSize - (size + 1)) / 2;
-        for (int i = 0; i < size; ++i) {
-            newArr[start + i + 1] = arr_[i];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+    if (size == 0) {
+        arr_[(capacity - 1) / 2] = v;
+        size = 1;
+    } else if ((capacity - size) / 2 > 0) {
+        arr_[(capacity - size) / 2 - 1] = v;
+        ++size;
     } else {
-        int start = (capacity - (size + 1)) / 2;
-        for (int i = size; i > 0; --i) {
-            arr_[start + i] = arr_[start + i - 1];
-        }
+        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+        arr_[capacity / 2] = v;
+        ++size;
     }
-
-    arr_[(capacity - (size + 1)) / 2] = v;
-    ++size;
 }
 
 bool FlexArray::pop_front() {
-    if (size == 0) {
-        return false;
-    }
-
-    int start = (capacity - size) / 2;
-    for (int i = 0; i < size - 1; ++i) {
-        arr_[start + i] = arr_[start + i + 1];
-    }
+    if (size == 0) return false;
 
     --size;
 
-    if (size < capacity / 2 && capacity > INITIALCAP) {
-        int newCapacity = LO_THRESHOLD * size;
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
-
-        int newStart = (newInternalSize - size) / 2;
-        for (int i = 0; i < size; ++i) {
-            newArr[newStart + i] = arr_[start + i];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+    if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size);
     }
     return true;
 }
@@ -206,30 +169,30 @@ bool FlexArray::insert(int i, int v) {
         return false;
     }
 
+    // Resize if necessary
     if (size == capacity) {
-        int newCapacity = HI_THRESHOLD * size;
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
-
-        int start = (newInternalSize - size) / 2;
-        for (int j = 0; j < size; ++j) {
-            newArr[start + j] = arr_[start + j];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+        resizeAndRecenter(LO_THRESHOLD * (size + 1));
     }
 
     int start = (capacity - size) / 2;
-    for (int j = size - 1; j >= i; --j) {
-        arr_[start + j + 1] = arr_[start + j];
+    int end = start + size;
+
+    // Decide direction to shift
+    bool shiftRight = (i - start) <= (end - i);
+
+    if (shiftRight) {
+        for (int j = size; j > i; --j) {
+            arr_[start + j] = arr_[start + j - 1];
+        }
+    } else {
+        for (int j = 0; j < i; ++j) {
+            arr_[start + j - 1] = arr_[start + j];
+        }
+        start--;
     }
 
     arr_[start + i] = v;
-
     ++size;
-
     return true;
 }
 
@@ -239,25 +202,17 @@ bool FlexArray::erase(int i) {
     }
 
     int start = (capacity - size) / 2;
+
+    // Shifting elements to close the gap
     for (int j = i; j < size - 1; ++j) {
         arr_[start + j] = arr_[start + j + 1];
     }
 
     --size;
 
-    if (size < capacity / 2 && capacity > INITIALCAP) {
-        int newCapacity = size * 2;
-        int newInternalSize = newCapacity + 2 * (HI_THRESHOLD - LO_THRESHOLD);
-        int* newArr = new int[newInternalSize];
-
-        for (int j = 0; j < size; ++j) {
-            newArr[start + j] = arr_[start + j];
-        }
-
-        delete[] arr_;
-        arr_ = newArr;
-        capacity = newCapacity;
+    // Resize if the array is now too large
+    if (size < capacity / HI_THRESHOLD && capacity > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size);
     }
-
     return true;
 }
