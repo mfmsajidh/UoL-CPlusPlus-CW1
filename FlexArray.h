@@ -96,8 +96,6 @@ public:
 	static constexpr int LO_THRESHOLD = 3;
 	static constexpr int HI_THRESHOLD = 7;
 
-    void resizeAndRecenter(int newCapacity);
-
 private:
 	// TODO: add your private member data (and possibly functions)
 
@@ -105,5 +103,9 @@ private:
 
     int size;
     int capacity;
+    int headroom_;
+    int tailroom_;
+
+    void resizeAndRecenter(int newCapacity);
 
 };
