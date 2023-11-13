@@ -1,0 +1,5 @@
+*.o
+./main.dSYM
+./FlexArrayTesterMain.dSYM
+./.idea
+main
