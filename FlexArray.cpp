@@ -15,8 +15,6 @@ FlexArray::FlexArray(const int* arr, int size) : size_(size), capacity_(LO_THRES
     for (int i = 0; i < size_; ++i) {
         arr_[headroom_ + i] = arr[i];
     }
-    cout << "Constructor headroom: " << headroom_ << endl;
-    cout << "Constructor tailroom: " << tailroom_ << endl;
 }
 
 FlexArray::~FlexArray() {
@@ -68,8 +66,6 @@ string FlexArray::print() const {
 }
 
 string FlexArray::printAll() const {
-    cout << "printAll headroom_: " << headroom_ << endl;
-    cout << "printAll tailroom_: " << tailroom_ << endl;
     stringstream ss;
     ss << "[";
     for (int i = 0; i < capacity_; ++i) {
@@ -131,28 +127,12 @@ bool FlexArray::pop_back() {
 }
 
 void FlexArray::push_front(int v) {
-    // Resize if no headroom is available
     if (headroom_ == 0) {
         resizeAndRecenter(LO_THRESHOLD * (size_ + 1));
     }
-
-    // Move existing elements to the right to make space for the new element
-    for (int i = size_ - 1; i >= 0; --i) {
-        arr_[headroom_ + i + 1] = arr_[headroom_ + i];
-    }
-
-    // Insert the new element at the front
-    arr_[headroom_] = v;
+    arr_[--headroom_] = v;
     ++size_;
-
-    // Update tailroom only (headroom remains the same after a push_front)
-    tailroom_ = capacity_ - headroom_ - size_;
-
-    cout << "push_front headroom_: " << headroom_ << endl;
-    cout << "push_front tailroom_: " << tailroom_ << endl;
-
 }
-
 
 bool FlexArray::pop_front() {
     if (size_ == 0) return false;
