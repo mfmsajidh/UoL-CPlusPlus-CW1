@@ -101,8 +101,8 @@ private:
 
 	int* arr_; // pointer to internal array
 
-    int size;
-    int capacity;
+    int size_;
+    int capacity_;
     int headroom_;
     int tailroom_;
 

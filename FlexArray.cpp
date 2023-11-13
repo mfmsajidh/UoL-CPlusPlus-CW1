@@ -6,35 +6,49 @@
 using namespace std;
 
 // Constructors and Destructor
-FlexArray::FlexArray() : arr_(new int[INITIALCAP]), size(0), capacity(INITIALCAP), headroom_(INITIALCAP / 2), tailroom_(INITIALCAP / 2) {}
+FlexArray::FlexArray() : arr_(new int[INITIALCAP]), size_(0), capacity_(INITIALCAP), headroom_(INITIALCAP / 2), tailroom_(INITIALCAP / 2) {}
 
-FlexArray::FlexArray(const int* arr, int size) : size(size), capacity(LO_THRESHOLD * size) {
-    arr_ = new int[capacity];
-    headroom_ = (capacity - size) / 2;
-    tailroom_ = capacity - headroom_ - size;
-    for (int i = 0; i < size; ++i) {
+FlexArray::FlexArray(const int* arr, int size) : size_(size), capacity_(LO_THRESHOLD * size) {
+    arr_ = new int[capacity_];
+    headroom_ = (capacity_ - size_) / 2;
+    tailroom_ = capacity_ - headroom_ - size_;
+    for (int i = 0; i < size_; ++i) {
         arr_[headroom_ + i] = arr[i];
     }
+    cout << "Constructor headroom: " << headroom_ << endl;
+    cout << "Constructor tailroom: " << tailroom_ << endl;
 }
 
 FlexArray::~FlexArray() {
     delete[] arr_;
 }
 
-FlexArray::FlexArray(const FlexArray& other) : size(other.size), capacity(other.capacity), headroom_(other.headroom_), tailroom_(other.tailroom_) {
-    arr_ = new int[capacity];
-    copy(other.arr_, other.arr_ + capacity, arr_);
+FlexArray::FlexArray(const FlexArray& other) : size_(other.size_), capacity_(other.capacity_), headroom_(other.headroom_), tailroom_(other.tailroom_) {
+    arr_ = new int[capacity_];
+
+    // Not using the below code since I'm having doubt whether can I use it as per the assignment guide or not
+//    copy(other.arr_, other.arr_ + capacity_, arr_);
+
+    for (int i = 0; i < capacity_; ++i) {
+        arr_[i] = other.arr_[i];
+    }
 }
 
 FlexArray& FlexArray::operator=(const FlexArray& other) {
     if (this != &other) {
         delete[] arr_;
-        size = other.size;
-        capacity = other.capacity;
+        size_ = other.size_;
+        capacity_ = other.capacity_;
         headroom_ = other.headroom_;
         tailroom_ = other.tailroom_;
-        arr_ = new int[capacity];
-        copy(other.arr_, other.arr_ + capacity, arr_);
+        arr_ = new int[capacity_];
+
+        // Not using the below code since I'm having doubt whether can I use it as per the assignment guide or not
+//        copy(other.arr_, other.arr_ + capacity_, arr_);
+
+        for (int i = 0; i < capacity_; ++i) {
+            arr_[i] = other.arr_[i];
+        }
     }
     return *this;
 }
@@ -43,9 +57,9 @@ FlexArray& FlexArray::operator=(const FlexArray& other) {
 string FlexArray::print() const {
     stringstream ss;
     ss << "[";
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < size_; ++i) {
         ss << arr_[headroom_ + i];
-        if (i < size - 1) {
+        if (i < size_ - 1) {
             ss << ", ";
         }
     }
@@ -54,15 +68,17 @@ string FlexArray::print() const {
 }
 
 string FlexArray::printAll() const {
+    cout << "printAll headroom_: " << headroom_ << endl;
+    cout << "printAll tailroom_: " << tailroom_ << endl;
     stringstream ss;
     ss << "[";
-    for (int i = 0; i < capacity; ++i) {
-        if (i >= headroom_ && i < headroom_ + size) {
+    for (int i = 0; i < capacity_; ++i) {
+        if (i >= headroom_ && i < headroom_ + size_) {
             ss << arr_[i];
         } else {
             ss << "X";
         }
-        if (i < capacity - 1) {
+        if (i < capacity_ - 1) {
             ss << ", ";
         }
     }
@@ -71,23 +87,23 @@ string FlexArray::printAll() const {
 }
 
 int FlexArray::getSize() const {
-    return size;
+    return size_;
 }
 
 int FlexArray::getCapacity() const {
-    return capacity;
+    return capacity_;
 }
 
 // Getters and Setters
 int FlexArray::get(int i) const {
-    if (i >= 0 && i < size) {
+    if (i >= 0 && i < size_) {
         return arr_[headroom_ + i];
     }
     return -1; // Undefined behavior if index is out of bounds
 }
 
 bool FlexArray::set(int i, int v) {
-    if (i >= 0 && i < size) {
+    if (i >= 0 && i < size_) {
         arr_[headroom_ + i] = v;
         return true;
     }
@@ -96,20 +112,20 @@ bool FlexArray::set(int i, int v) {
 
 // Structural Modifiers
 void FlexArray::push_back(int v) {
-    if (size >= capacity - tailroom_) {
-        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+    if (size_ >= capacity_ - tailroom_) {
+        resizeAndRecenter(LO_THRESHOLD * (size_ + 1));
     }
-    arr_[headroom_ + size] = v;
-    ++size;
+    arr_[headroom_ + size_] = v;
+    ++size_;
     --tailroom_;
 }
 
 bool FlexArray::pop_back() {
-    if (size == 0) return false;
-    --size;
+    if (size_ == 0) return false;
+    --size_;
     ++tailroom_;
-    if (size <= capacity / HI_THRESHOLD && capacity > INITIALCAP) {
-        resizeAndRecenter(LO_THRESHOLD * size);
+    if (size_ <= capacity_ / HI_THRESHOLD && capacity_ > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size_);
     }
     return true;
 }
@@ -117,69 +133,73 @@ bool FlexArray::pop_back() {
 void FlexArray::push_front(int v) {
     // Resize if no headroom is available
     if (headroom_ == 0) {
-        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+        resizeAndRecenter(LO_THRESHOLD * (size_ + 1));
     }
 
     // Move existing elements to the right to make space for the new element
-    for (int i = size - 1; i >= 0; --i) {
+    for (int i = size_ - 1; i >= 0; --i) {
         arr_[headroom_ + i + 1] = arr_[headroom_ + i];
     }
 
     // Insert the new element at the front
     arr_[headroom_] = v;
-    ++size;
+    ++size_;
 
     // Update tailroom only (headroom remains the same after a push_front)
-    tailroom_ = capacity - headroom_ - size;
+    tailroom_ = capacity_ - headroom_ - size_;
+
+    cout << "push_front headroom_: " << headroom_ << endl;
+    cout << "push_front tailroom_: " << tailroom_ << endl;
+
 }
 
 
 bool FlexArray::pop_front() {
-    if (size == 0) return false;
+    if (size_ == 0) return false;
     ++headroom_;
-    --size;
-    if (size <= capacity / HI_THRESHOLD && capacity > INITIALCAP) {
-        resizeAndRecenter(LO_THRESHOLD * size);
+    --size_;
+    if (size_ <= capacity_ / HI_THRESHOLD && capacity_ > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size_);
     }
     return true;
 }
 
 bool FlexArray::insert(int i, int v) {
-    if (i < 0 || i > size) return false;
-    if (size >= capacity - tailroom_) {
-        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+    if (i < 0 || i > size_) return false;
+    if (size_ >= capacity_ - tailroom_) {
+        resizeAndRecenter(LO_THRESHOLD * (size_ + 1));
     }
-    for (int j = size; j > i; --j) {
+    for (int j = size_; j > i; --j) {
         arr_[headroom_ + j] = arr_[headroom_ + j - 1];
     }
     arr_[headroom_ + i] = v;
-    ++size;
+    ++size_;
     --tailroom_;
     return true;
 }
 
 bool FlexArray::erase(int i) {
-    if (i < 0 || i >= size) return false;
-    for (int j = i; j < size - 1; ++j) {
+    if (i < 0 || i >= size_) return false;
+    for (int j = i; j < size_ - 1; ++j) {
         arr_[headroom_ + j] = arr_[headroom_ + j + 1];
     }
-    --size;
+    --size_;
     ++tailroom_;
-    if (size <= capacity / HI_THRESHOLD && capacity > INITIALCAP) {
-        resizeAndRecenter(LO_THRESHOLD * size);
+    if (size_ <= capacity_ / HI_THRESHOLD && capacity_ > INITIALCAP) {
+        resizeAndRecenter(LO_THRESHOLD * size_);
     }
     return true;
 }
 
 void FlexArray::resizeAndRecenter(int newCapacity) {
     int* newArr = new int[newCapacity];
-    int newHeadroom = (newCapacity - size) / 2;
-    for (int i = 0; i < size; ++i) {
+    int newHeadroom = (newCapacity - size_) / 2;
+    for (int i = 0; i < size_; ++i) {
         newArr[newHeadroom + i] = arr_[headroom_ + i];
     }
     delete[] arr_;
     arr_ = newArr;
-    capacity = newCapacity;
+    capacity_ = newCapacity;
     headroom_ = newHeadroom;
-    tailroom_ = newCapacity - newHeadroom - size;
+    tailroom_ = newCapacity - newHeadroom - size_;
 }
