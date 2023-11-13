@@ -174,11 +174,16 @@ bool FlexArray::erase(int i) {
 void FlexArray::resizeAndRecenter(int newCapacity) {
     int* newArr = new int[newCapacity];
     int newHeadroom = (newCapacity - size_) / 2;
+    int newSize = size_;
+
     for (int i = 0; i < size_; ++i) {
         newArr[newHeadroom + i] = arr_[headroom_ + i];
     }
+
     delete[] arr_;
+
     arr_ = newArr;
+    size_ = newSize;
     capacity_ = newCapacity;
     headroom_ = newHeadroom;
     tailroom_ = newCapacity - newHeadroom - size_;
