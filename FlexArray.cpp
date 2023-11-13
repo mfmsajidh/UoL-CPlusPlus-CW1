@@ -149,12 +149,21 @@ bool FlexArray::insert(int i, int v) {
     if (size_ >= capacity_ - tailroom_) {
         resizeAndRecenter(LO_THRESHOLD * (size_ + 1));
     }
-    for (int j = size_; j > i; --j) {
-        arr_[headroom_ + j] = arr_[headroom_ + j - 1];
+
+    if (i <= size_ / 2) {
+        for (int j = size_; j > i; --j) {
+            arr_[j - 1] = arr_[j];
+        }
+        --headroom_;
+    } else {
+        for (int j = size_; j > i; --j) {
+            arr_[headroom_ + j] = arr_[headroom_ + j - 1];
+        }
+        --tailroom_;
     }
+
     arr_[headroom_ + i] = v;
     ++size_;
-    --tailroom_;
     return true;
 }
 
