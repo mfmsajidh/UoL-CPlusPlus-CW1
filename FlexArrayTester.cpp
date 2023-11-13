@@ -856,9 +856,11 @@ void FlexArrayTester::errorOut_(const string& errMsg, int errResult, unsigned in
 	cerr << std::flush;
 }
 
-void FlexArrayTester::passOut_() {
+int passCount = 0;
 
+void FlexArrayTester::passOut_() {
 	if (!error_) {
+        cout << "Passed: " << ++passCount << endl;
 		cerr << funcname_ << ":" << " pass" << endl;
 	}
 	cerr << std::flush;
