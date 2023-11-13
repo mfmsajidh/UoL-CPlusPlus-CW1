@@ -1,6 +1,6 @@
 *.o
-./main.dSYM
-./FlexArrayTesterMain.dSYM
+main.dSYM
+FlexArrayTesterMain.dSYM
 .idea
 main
-./cmake-build-debug
+FlexArrayTesterMain
