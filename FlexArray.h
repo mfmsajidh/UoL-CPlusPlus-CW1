@@ -106,6 +106,7 @@ private:
     int headroom_;
     int tailroom_;
 
+    // Handler to resize and recenter internal array if capacity changes
     void resizeAndRecenter(int newCapacity);
 
 };
