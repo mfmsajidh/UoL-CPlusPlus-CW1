@@ -115,6 +115,9 @@ bool FlexArray::pop_back() {
 }
 
 //void FlexArray::push_front(int v) {
+//    cout << "Before: " << print() << endl;
+//    cout << "Before: " << printAll() << endl;
+//
 //    if (size >= capacity - headroom_) {
 //        resizeAndRecenter(LO_THRESHOLD * (size + 1));
 //    }
@@ -125,8 +128,8 @@ bool FlexArray::pop_back() {
 //    arr_[headroom_] = v;
 //    ++size;
 //
-//    cout << print() << endl;
-//    cout << printAll() << endl;
+//    cout << "After: " << print() << endl;
+//    cout << "After: " << printAll() << endl;
 //}
 
 void FlexArray::push_front(int v) {
@@ -136,20 +139,36 @@ void FlexArray::push_front(int v) {
     }
 
     // Move existing elements to the right to make space for the new element
-    for (int i = size; i > 0; --i) {
-        arr_[headroom_ + i] = arr_[headroom_ + i - 1];
+    for (int i = size - 1; i >= 0; --i) {
+        arr_[headroom_ + i + 1] = arr_[headroom_ + i];
     }
 
     // Insert the new element at the front
     arr_[headroom_] = v;
     ++size;
 
-    // Update headroom and tailroom
-    --headroom_;
-    if (capacity > size + headroom_) {
-        ++tailroom_;
-    }
+    // Update tailroom only (headroom remains the same after a push_front)
+    tailroom_ = capacity - headroom_ - size;
 }
+
+//void FlexArray::push_front(int v) {
+//    if (headroom_ == 0 || size + headroom_ >= capacity) {
+//        // Resize if no headroom is available or the array is full
+//        resizeAndRecenter(LO_THRESHOLD * (size + 1));
+//    }
+//
+//    // Shift existing elements to the right
+//    for (int i = size - 1; i >= 0; --i) {
+//        arr_[headroom_ + i + 1] = arr_[headroom_ + i];
+//    }
+//
+//    // Insert the new element at the front
+//    arr_[headroom_] = v;
+//    ++size;
+//
+//    // Update tailroom only (headroom remains the same after a push_front)
+//    tailroom_ = capacity - headroom_ - size;
+//}
 
 
 bool FlexArray::pop_front() {
@@ -189,7 +208,6 @@ bool FlexArray::erase(int i) {
     return true;
 }
 
-// Private Helper Method for Resizing and Recentering
 void FlexArray::resizeAndRecenter(int newCapacity) {
     int* newArr = new int[newCapacity];
     int newHeadroom = (newCapacity - size) / 2;
